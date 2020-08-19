@@ -7,6 +7,75 @@ import argparse
 import imutils
 import cv2
 
+#read image
+image_orig = cv2.imread("image.png")
+image_to_process = image_orig.copy()
+counter = 0
+
+#画像のカラーを反転 GBR形式
+image_to_process = (255-image_to_process)
+image_to_process_1 = image_to_process.copy() #テスト出力用
+
+#画像をグレースケールに変換
+image_gray = cv2.cvtColor(image_to_process, cv2.COLOR_BGR2GRAY)  ###input
+image_gray = cv2.GaussianBlur(image_gray, (7, 7), 0)
+
+#シャーレの文字（黒）をバックグラウンドの色に書き換える
+image_gray = np.where(image_gray >= 135, 100, image_gray)
+image_gray = np.where(image_gray <= 110, 0, image_gray)
+image_gray = np.where((image_gray < 135) & (image_gray > 110), 255, image_gray)
+cv2.imwrite("image_gray.png", image_gray)
+
+#エッジを探す
+image_edged = cv2.Canny(image_gray, 0, 255)
+image_edged = cv2.dilate(image_edged, None, iterations=1)
+image_edged = cv2.erode(image_edged, None, iterations=1)
+cv2.imwrite("image_edged.png", image_edged)
+
+#輪郭を探す
+#面積を探す
+cnts = cv2.findContours(image_edged.copy(), cv2.RETR_EXTERNAL, 
+                        cv2.CHAIN_APPROX_SIMPLE)
+cnts = imutils.grab_contours(cnts)
+
+#輪郭ごとにループしてboxで囲む
+for c in cnts:
+    if cv2.contourArea(c) < 1000:
+        continue
+    if cv2.contourArea(c) > 2500:
+        continue
+    
+    #boxで囲む
+    box = cv2.minAreaRect(c)
+    box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+    box = np.array(box, dtype="int")
+    
+    box = perspective.order_points(box)
+    cv2.drawContours(image_to_process, [box.astype("int")], -1, (0, 255, 0), 2)
+    
+    #loop over the original points and draw them
+    for (x, y) in box:
+        cv2.circle(image_to_process, (int(x), int(y)), 5, (0, 0, 255), -1)
+    
+    #compute the Convex Hull of the contour
+    hull = cv2.convexHull(c) # cv2.convexHull(c)とは？？？？
+    cv2.drawContours(image_contours, [hull], 0, (0,255,0),1)
+    
+    counter += 1
+
+#コロニー数と処理した画像を出力
+print("{} colonies".format(counter))
+cv2.imwrite("image_to_process.png", image_to_process)
+
+"""
+ToDO:
+コロニーのサイズを枠の横に表示させる
+"""
+
+
+
+"""
+Old! 後で消す
 def midpoint(ptA, ptB):
 	return ((ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5)
 
@@ -111,9 +180,4 @@ for c in cnts:
 	#show the output image
 	cv2.imshow("Image", orig)
 	cv2.waitKey(0)
-
-
 """
-resolusion/DPI fitting
-"""
-#ipadの写真サイズに合うように作り直す
