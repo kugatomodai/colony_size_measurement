@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bacterial colony finder</title>
+</head>
+<body bgcolor="lightgray">
+    <h1>Bacterial colony finder</h1>
+    <p>Input your petri dish with bacterial colonies, and this tool would find colonies and show you the size of colonies.</p>
+    <p>*attention*</p>
+    <p>Avoid writing something on your petri dish. It could cause the malfunciton of the finder.</p>
+    <p></p>
+    <h3>Input your plate image:</h3>
+    <form action="/cgi-bin/imageAnalyzer.py" method="POST">
+        <p>
+            <input type="file" id="input_image" accept="image/*">
+            <input type="submit" name="submit" value="submit">
+            <img id="preview">
+            <p></p>
+            <h3>processed image:</h3>
+            <img id="processed">
+        </p>
+    </form>
+    <!-- footer -->
+    <footer>
+        <p>All rights reserved by Tomo KUGA, a student of the University of Tokyo.</p>
+    </footer>
+    
+</body>
+</html>
